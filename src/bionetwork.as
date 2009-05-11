@@ -1,21 +1,3 @@
-/*
-**    Copyright (C) 2003-2009 Institute for Systems Biology
-**                            Seattle, Washington, USA.
-**
-**    This library is free software; you can redistribute it and/or
-**    modify it under the terms of the GNU Lesser General Public
-**    License as published by the Free Software Foundation; either
-**    version 2.1 of the License, or (at your option) any later version.
-**
-**    This library is distributed in the hope that it will be useful,
-**    but WITHOUT ANY WARRANTY; without even the implied warranty of
-**    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-**    Lesser General Public License for more details.
-**
-**    You should have received a copy of the GNU Lesser General Public
-**    License along with this library; If not, see <http://www.gnu.org/licenses/>.
-*/
-
 package {
 	import com.adobe.serialization.json.JSON;
 	
@@ -23,16 +5,18 @@ package {
 	import flare.display.RectSprite;
 	import flare.display.TextSprite;
 	import flare.vis.Visualization;
+	import flare.vis.controls.TooltipControl;
 	import flare.vis.data.Data;
 	import flare.vis.data.DataSprite;
 	import flare.vis.data.EdgeSprite;
 	import flare.vis.data.NodeSprite;
 	import flare.vis.data.render.ArrowType;
 	import flare.vis.events.SelectionEvent;
+	import flare.vis.events.TooltipEvent;
 	import flare.vis.legend.Legend;
 	import flare.vis.operator.label.Labeler;
 	import flare.vis.operator.layout.CircleLayout;
-	import flare.vis.operator.layout.ForceDirectedLayout;
+	import flare.vis.operator.layout.ForceDirectedLayout; 
 	
 	import flash.display.LoaderInfo;
 	import flash.events.Event;
@@ -189,7 +173,7 @@ package {
 		this.resizeStage(visindex, this.dataTable, options);
 		this.constructGraph(this.dataTable);
 
-		trace("LAYOUT DATA");
+		//trace("LAYOUT DATA");
 		//layout from layoutTable
 		if (this.layoutTable!=null){
 			this.importLayout(this.layoutTable);
@@ -213,7 +197,7 @@ package {
 			this.createLegend();
 		}
 		addChild(this.network);
-		trace("update network sprite");
+		//trace("update network sprite");
 		this.network.update();
 }	
 	private function createLegend():void {
@@ -234,7 +218,39 @@ package {
 	//DATA IMPORT FUNCTIONS
 
 	private function constructGraph(dataTable:DataView):void {
-		trace("construct graph");
+		
+		var fmt:TextFormat = new TextFormat();
+		fmt.color = 0x000000;
+			fmt.size = 14;
+			fmt.bold = true;
+		
+		var ttc:TooltipControl = new TooltipControl(NodeSprite);
+		(ttc.tooltip as TextSprite).textFormat = fmt;
+			
+			ttc.addEventListener(TooltipEvent.SHOW,function(evt:TooltipEvent):void {
+				trace("the node you moused over is: " + evt.node.data.name);
+				(ttc.tooltip as TextSprite).textField.text = evt.node.data.name;//"HERE IS YOUR TOOLTIP";//evt.node.name;
+				(ttc.tooltip as TextSprite).render();
+			});
+			
+			this.network.controls.add(ttc); 
+	
+	
+/*
+		var etc:TooltipControl = new TooltipControl(NodeSprite);
+		(etc.tooltip as TextSprite).textFormat = fmt;
+			
+			etc.addEventListener(TooltipEvent.SHOW,function(evt:TooltipEvent):void {
+				trace("the edge you moused over is: " + evt.edge.data.name);
+				(etc.tooltip as TextSprite).textField.text = evt.node.data.name;
+				(etc.tooltip as TextSprite).render();
+			});
+			
+			this.network.controls.add(etc);
+*/
+		
+		
+		//trace("construct graph");
 		var interactor_name1:String;
 		var interactor_value1:String;
 		var interactor_name2:String;
@@ -244,44 +260,57 @@ package {
 		var ixnsources:Array;
 		var edge:EdgeSprite;
 		var directed:Boolean=false;	
+		var orphan:Boolean=false;
 		for (var i:Number = 0; i<dataTable.getNumberOfRows(); i++) {
+			//trace("howdy");
 			interactor_name1=dataTable.getFormattedValue(i,1);
-			trace("formatted_name1" + interactor_name1);
+			//trace("formatted_name1" + interactor_name1);
 			interactor_value1=dataTable.getValue(i,1);
-			trace("value1" + interactor_value1);
+			//trace("value1" + interactor_value1);
 			interactor_name2=dataTable.getFormattedValue(i,2);
 			interactor_value2=dataTable.getValue(i,2);
+			orphan = (interactor_value2 == null || interactor_value2 == '');
 			
-		if (interactor_value1==interactor_value2){
-			continue;
-		}
-			//for other columns
-			trace(dataTable.getNumberOfColumns());
-//			if (dataTable.getNumberOfColumns()>2){
+			if (interactor_value1==interactor_value2){
+				continue;
+			}
 				for(var j:Number=3; j<dataTable.getNumberOfColumns(); j++){
 					var cellValue:String = dataTable.getValue(i,j);
-					trace("Cell" + cellValue);
+					//trace("Cell" + cellValue);
 					var columnName:String = dataTable.getColumnLabel(j);
 					if (columnName=='sources'){
 						trace("SOURCES");
-						ixnsources=cellValue.split(", ");
+						if (cellValue != null) {
+							trace("sources is: " + cellValue);
+							ixnsources=cellValue.split(", ");
+						}
 					}
 					else if (columnName=='directed'){
 						directed = Boolean(cellValue=='true');
-						trace("dir:" + directed);
 					}
-				//}
 			}
-			
-			//this section replace network.addnodeifnotexsistant calls
+
+				//begin dan
+				/*
+				interactor1=this.network.addNodeIfNotExist(interactor_name1);
+				if (interactor_name2) {
+					interactor2=this.network.addNodeIfNotExist(interactor_name2);
+				}
+				*/
+				//end dan
+				
+				//begin ryan
+							//this section replace network.addnodeifnotexsistant calls
 			//i needed to be able to do things to nodes once on creation for selection stuff
 			//
 			//
+			
 			interactor_name1 = interactor_name1 ? interactor_name1 : interactor_value1;
 			interactor_name2 = interactor_name2 ? interactor_name2 : interactor_value2;
 			var interactors : Array = new Array();
 			for each(var name : * in [interactor_name1,interactor_name2])
-			{	
+			{
+				if (!name) continue;	
 				if (!network.checkNode(name)){
 					trace("create");
 					var interactor : NodeSprite = network.addNode({name:name});
@@ -293,22 +322,41 @@ package {
 				else{
 					interactors.push(network.findNodeByName(name));
 				}
-				
 			}
-			interactor1 = interactors[0];
+						interactor1 = interactors[0];
 			interactor2 = interactors[1];
+				//end ryan
+
 			
-					
-			edge=this.network.addEdgeIfNotExist(interactor1, interactor2, directed);
-			_addSelectionCapabilities(edge,interactor1,interactor2,i);
+			
+			if (!orphan) {
+				//trace("adding edge");
+				edge=this.network.addEdgeIfNotExist(interactor1, interactor2, directed);
+				_addSelectionCapabilities(edge,interactor1,interactor2,i);
+				//edge.addEventListener(MouseEvent.MOUSE_OVER, onMouseOverEdge);
+			} else {
+				_addSelectionCapabilitiesForNode(interactor1, i, 1);
+			}		
+
 			//loop through ixn sources
-			if (ixnsources){
+			if ((ixnsources) && (!orphan)){
 				for (var k:Number=0; k<ixnsources.length; k++){
 					this.network.addEdgeSource(edge, ixnsources[k]);
 				}
 			}
-		
+			
+		this.network.data.nodes.visit(addSelectListener);
+		this.network.data.edges.visit(addSelectListener);
 		}
+	}
+	
+	private function onMouseOverNode(event:MouseEvent):void {
+		trace("over a node");
+		//event.target
+	}
+	
+	private function onMouseOverEdge(event:MouseEvent):void {
+		trace("over an edge");
 	}
 
     private function importLayout(layoutTable:DataView):void {
@@ -341,7 +389,7 @@ package {
     }
 	
 	private function importTimeCourseData(nodeDataTable:DataView):void{
-		trace("IMPORT_TIME_COURSE_DATA");
+		//trace("IMPORT_TIME_COURSE_DATA");
 		var data = {};
 		for (var i:Number = 0; i<nodeDataTable.getNumberOfRows();i++) {
 			//first column name
@@ -369,17 +417,39 @@ package {
 		}
 	}
 	
+	
+	private function _addSelectionCapabilitiesForNode(node:NodeSprite, i:int, col:int): void {
+		node.addEventListener(MouseEvent.CLICK,this._selectionHandeler);
+
+		node.addEventListener(MouseEvent.CLICK,this.onLocalNodeSelect);
+		
+		_appendSelectionInfo(node,{row:i,col:col});
+		
+	}
+	
 	private function _addSelectionCapabilities(edge:EdgeSprite, interactor1 :NodeSprite, interactor2:NodeSprite, i:int) : void
 	{
-//		interactor1.addEventListener(MouseEvent.CLICK,this._selectionHandeler);
-//		interactor2.addEventListener(MouseEvent.CLICK,this._selectionHandeler);
+		_addSelectionCapabilitiesForNode(interactor1, i, 1);
+		_addSelectionCapabilitiesForNode(interactor2, i, 2);
+
 		edge.addEventListener(MouseEvent.CLICK,this._selectionHandeler);
-//		_appendSelectionInfo(interactor1,{node:interactor1.name});
-//		_appendSelectionInfo(interactor2,{node:interactor2.name});
+
+		edge.addEventListener(MouseEvent.CLICK,this.onLocalNodeSelect);
+
+
+
 		_appendSelectionInfo(edge,{row:i});
-		_appendSelectionInfo(interactor1,{row:i,col:1});
-		_appendSelectionInfo(interactor2,{row:i,col:2});
-			
+		
+	}
+	
+	private function onLocalNodeSelect(event:MouseEvent):void {
+		trace(" a node was selected " );
+		var node:NodeSprite = event.target as NodeSprite;
+		
+		//this is where you would do something when the user clicks on a node
+		
+		
+		this.network.toggleNodeColor(node.data.name);
 		
 	}
 	
@@ -401,6 +471,7 @@ package {
 		}
 	
 	private function addSelectListener (ds:DataSprite):Boolean {
+		 
 		ds.addEventListener(MouseEvent.CLICK,this._selectionHandeler); 
 		return true;
 		}
@@ -437,6 +508,7 @@ package {
 		}
 		
 		if (this.options['edgeRenderer']=='multiedge'){
+			trace("+++USER has selected multi edge renderer");
 			this.network.data.edges.setProperties({
 				lineWidth: 0.5,
 				lineAlpha: 1,
@@ -530,12 +602,13 @@ package {
 			t.play();
 		}
 		
-//		private function onSingleClick(evt:SelectionEvent):void {
-////			ExternalInterface.call("test");
+		private function onSingleClick(evt:SelectionEvent):void {
+		ExternalInterface.call("test");
 //			showText(info1,"single click on node " + evt.node.data.name);
-//			ExternalInterface.call("test");
-//			trace("click");
-//		}
+			ExternalInterface.call("test");
+			trace("click");
+		}
+
 		private function onSingleClickDeselect(evt:SelectionEvent):void {
 //			if (info1.alpha > 0) //deselect info only if text is shown at the moment
 //			showText(info1,"single click deselect",0xff0000);

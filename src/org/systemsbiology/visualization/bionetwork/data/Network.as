@@ -1,21 +1,3 @@
-/*
-**    Copyright (C) 2003-2009 Institute for Systems Biology
-**                            Seattle, Washington, USA.
-**
-**    This library is free software; you can redistribute it and/or
-**    modify it under the terms of the GNU Lesser General Public
-**    License as published by the Free Software Foundation; either
-**    version 2.1 of the License, or (at your option) any later version.
-**
-**    This library is distributed in the hope that it will be useful,
-**    but WITHOUT ANY WARRANTY; without even the implied warranty of
-**    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-**    Lesser General Public License for more details.
-**
-**    You should have received a copy of the GNU Lesser General Public
-**    License along with this library; If not, see <http://www.gnu.org/licenses/>.
-*/
-
 package org.systemsbiology.visualization.bionetwork.data
 {
 	import flare.query.methods.*;
@@ -113,7 +95,29 @@ package org.systemsbiology.visualization.bionetwork.data
 		public function setNodeColor(name:String, color:String):void{
 			trace("setNodeColor");
 			this.data.nodes.setProperty("fillColor", color, null, function(n:NodeSprite):Boolean{return n.data.name==name;}); 
-		}	
+		}
+		
+		public function toggleNodeColor(name:String):void{
+			trace("toggleNodeColor");
+
+			var originalColor:Number = 0x7F0055CC;
+			var selectedColor:Number = 0xff0000ff;
+
+			this.data.nodes.visit(function(ns:NodeSprite):void {
+				ns.fillColor = originalColor;
+			});
+
+
+			this.data.nodes.visit(function(ns:NodeSprite):void {
+				if (ns.data.name == name) {
+					trace("node color before change:" + ns.fillColor);
+					var color:Number = (ns.fillColor == originalColor) ? selectedColor : originalColor;
+					ns.fillColor = color;
+				}
+			});
+		}
+			
+
 		
 		public function setNodeShape(name:String, shape:String):void{
 			trace("setNodeShape");

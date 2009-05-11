@@ -1,21 +1,3 @@
-/*
-**    Copyright (C) 2003-2009 Institute for Systems Biology
-**                            Seattle, Washington, USA.
-**
-**    This library is free software; you can redistribute it and/or
-**    modify it under the terms of the GNU Lesser General Public
-**    License as published by the Free Software Foundation; either
-**    version 2.1 of the License, or (at your option) any later version.
-**
-**    This library is distributed in the hope that it will be useful,
-**    but WITHOUT ANY WARRANTY; without even the implied warranty of
-**    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-**    Lesser General Public License for more details.
-**
-**    You should have received a copy of the GNU Lesser General Public
-**    License along with this library; If not, see <http://www.gnu.org/licenses/>.
-*/
-
 package org.systemsbiology.visualization.bionetwork.display
 {
 	import flare.vis.data.DataSprite;
@@ -27,15 +9,19 @@ package org.systemsbiology.visualization.bionetwork.display
 	
 	public class MultiEdgeRenderer implements IRenderer
 	{
-		public var lineWidth:Number = 3;
+		public var lineWidth:Number = 1;
 		public var offsetIncr:Number = 3;
-		public var colorMap:Object = {HPRD:"0x3366CC",MINT:"0x339900",IntAct:"0xA2627A", MIPS:"0xFF6600", BioGRID:"0xFF0000"};
+//		public var colorMap:Object = {STRING:"0x3366CC",CoIP:"0x339900",EGRIN:"0xA2627A", MIPS:"0xFF6600", BioGRID:"0xFF0000"};
+		public var colorMap:Object = {STRING:"0x3366CC",CoIP:"0xFF0000",EGRIN:"0xA2627A", MIPS:"0xFF6600", BioGRID:"0xFF0000", undefColor:"0x330000"};
+
 //		private var data_sources:Array = ["HPRD","MINT","IntAct","MIPS","BioGrid"];
 		
 		private static var _instance:MultiEdgeRenderer = new MultiEdgeRenderer();
 		public static function get instance():MultiEdgeRenderer { return _instance; }	
 		public function render(d:DataSprite):void
 		{
+			trace ("IN RENDER METHOD");
+			trace("interactor1 = " + d.data.interactor1);
 			var delta_x1:Number = 0;
 			var delta_x2:Number = 0;
 			var delta_y1:Number = 0;
@@ -44,6 +30,11 @@ package org.systemsbiology.visualization.bionetwork.display
 			
 			var e:EdgeSprite = d as EdgeSprite;
 			var data_sources:Array = e.props.ixnsources;
+
+			trace("source node: " + e.source + ", target: " + e.target);
+			
+
+
 			var x1:Number = e.x1, y1:Number = e.y1;
 			var x2:Number = e.x2, y2:Number = e.y2;
 
@@ -57,8 +48,10 @@ package org.systemsbiology.visualization.bionetwork.display
 			delta_x2 = (delta_y1)/c;
 			delta_y2 = (delta_x1)/c;
 
+			
 			for (var i:Number = 0; i<data_sources.length; i++){
 				g.lineStyle(lineWidth, colorMap[data_sources[i]]);
+				trace("assigning edge color  " + colorMap[data_sources[i]] + " for type = " + data_sources[i]);
 				
 				offset=i/2;
 				if(offset!=Math.floor(offset)){ offset=-1*Math.ceil(offset); }

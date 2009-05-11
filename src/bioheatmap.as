@@ -1,21 +1,3 @@
-/*
-**    Copyright (C) 2003-2009 Institute for Systems Biology
-**                            Seattle, Washington, USA.
-**
-**    This library is free software; you can redistribute it and/or
-**    modify it under the terms of the GNU Lesser General Public
-**    License as published by the Free Software Foundation; either
-**    version 2.1 of the License, or (at your option) any later version.
-**
-**    This library is distributed in the hope that it will be useful,
-**    but WITHOUT ANY WARRANTY; without even the implied warranty of
-**    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-**    Lesser General Public License for more details.
-**
-**    You should have received a copy of the GNU Lesser General Public
-**    License along with this library; If not, see <http://www.gnu.org/licenses/>.
-*/
-
 package 
 {
 
@@ -44,7 +26,7 @@ package
 
                 //paramaters
                 
-                public var  myData:Object;// = new Array();
+                public var myData:Object;// = new Array();
                 public var options:Object;// = new Array();
                 
                 //font
@@ -130,17 +112,17 @@ package
           
                 public override function draw(dataJSON:String,optionsJSON:String):void
                 {
-                	this._log("Draw called");
+                	////this._log("Draw called");
                 	this.myData = new org.systemsbiology.visualization.data.DataView(dataJSON,"");
 
                 	this.options = JSON.decode(optionsJSON);
                 	
                 	//set up defaults
-                	this._log("Setting Options and Data Range");
+                	////this._log("Setting Options and Data Range");
                 	this._setOptionDefaults(this.options);
                 	this._calcDataRange(this.myData);
                 	
-              		this._log("Loading Color Range...");
+              		////this._log("Loading Color Range...");
 		            this._discreteColorRange = new org.systemsbiology.visualization.bioheatmap.discretecolorrange(this._maxColors, this._dataRange, { maxColor: this._maxColor,
 			                minColor: this._minColor,
 			                emptyDataColor: this._emptyDataColor,
@@ -149,7 +131,7 @@ package
 			            });
 			            
 			            
-			        this._log("Setting Layout Options");    
+			        ////this._log("Setting Layout Options");    
 					if (this._fixedSpriteSize) {
 		
 		                this._setDefaultsByHeatMapSize(myData);
@@ -159,11 +141,11 @@ package
 		                this._setDefaultsByCellSize(myData);
 		
 		            }
-					this._log("resize");
+					////this._log("resize");
 					this.resizeContainer(Math.ceil(this._SpriteWidth+this._columnLabelHeight*.85),this._SpriteHeight);
 
 
-					this._log("Creating Sprites"); 
+					////this._log("Creating Sprites"); 
                 	this._colSprite = new Sprite();
                 	this._colSprite.y=0;
                 	this._colSprite.x=this._rowLabelWidth + this._rowLabelRightPadding + this._horizontalPadding;
@@ -183,7 +165,7 @@ package
                 	this._selectionSprite.y=this._columnLabelHeight*.85+this._columnLabelBottomPadding;//+ this._verticalPadding;
                 	this._selectionSprite.x=this._rowLabelWidth + this._rowLabelRightPadding+this._horizontalPadding;
 					
-                    this._log("adding kids"); 
+                    ////this._log("adding kids"); 
 					
 					addChild(this._rowSprite);
 					addChild(this._colSprite);
@@ -191,7 +173,7 @@ package
 					addChild(this._selectionSprite);
 
                 	// Draw heatmap                	
-					this._log("Drawing...");
+					////this._log("Drawing...");
 		            var colStartIndex : int = this._useRowNames ? 1 : 0;
 		            var rowNameIndex : int = 0;
 		            
@@ -199,10 +181,10 @@ package
 		           	this._drawRowLabels(rowNameIndex); // draw row names if present
 		
 		            for (var row : int = 0; row < myData.getNumberOfRows(); row++) {
-						this._log("Row: "+ row + " of " + this._numRows);
+						////this._log("Row: "+ row + " of " + this._numRows);
 
 		                for (var col : int = colStartIndex; col < myData.getNumberOfColumns(); col++) {
-		                	this._log("Col: "+ col +  " of " + myData.getNumberOfColumns());
+		                	////this._log("Col: "+ col +  " of " + myData.getNumberOfColumns());
 						
 		                    this._drawHeatMapCell(row, col);
 		                
@@ -330,7 +312,7 @@ package
 			    
 			    //these 3 functions  do the actuall selecting in the AS context (display)
 			    protected override function _setSelectionCell(row : *, col : *) : void {
-					this._log("cell selected");
+					////this._log("cell selected");
 					var topLeftPoint : Object = this._getCellXYTopLeft(row, col);
 					this._drawSelectionRect(topLeftPoint.x,topLeftPoint.y,this._cellWidth,this._cellHeight);
 			    }
@@ -556,24 +538,24 @@ package
 			    // determines the max width of the row labels
 			
 			    private function _calcLabelLengths() : void {
-			    	this._log("calc label lengths"); 
+			    	////this._log("calc label lengths"); 
 			    
 			
 			        var  rowLabelIndex : int = 0;
 			        var textField : TextField = new TextField();
 			        
 			        textField.defaultTextFormat = this._labelTextFormat;
-					this._log( "rows"); 
+					////this._log( "rows"); 
 			
 			        for (var row : int = 0; row < this.myData.getNumberOfRows(); row++) {
-						this._log("row " + row); 
+						////this._log("row " + row); 
 			            var rowName : String = this._getValueFormattedOrNot(row, rowLabelIndex);
-			            this._log("data " + rowName); 
+			            ////this._log("data " + rowName); 
 						textField.text = rowName;
 						 
 						
 			            var rowNameWidth: Number = textField.textWidth;
-						this._log(textField.text+" textWidth: "+textField.textWidth);//+" measuredWidth :"+textField.measuredWidth);
+						////this._log(textField.text+" textWidth: "+textField.textWidth);//+" measuredWidth :"+textField.measuredWidth);
 						
 			            if (rowNameWidth > this._rowLabelWidth) {
 			
@@ -585,20 +567,20 @@ package
 			        
 					var colStartIndex : int = this._useRowNames ? 1 : 0;
 					
-					this._log("cols"); 
+					////this._log("cols"); 
 			        for (var col : int = colStartIndex; col < myData.getNumberOfColumns(); col++) {
 			
 			            var colName : String = myData.getColumnLabel(col);
 						textField.text = colName;
 			            var colNameWidth: Number = textField.textWidth;
-						this._log(textField.text+" textWidth: "+textField.textWidth);//+" measuredWidth :"+textField.measuredWidth);
+						////this._log(textField.text+" textWidth: "+textField.textWidth);//+" measuredWidth :"+textField.measuredWidth);
 			            if (colNameWidth > this._columnLabelHeight) {
 			
 			                this._columnLabelHeight = Math.ceil(colNameWidth);
 			
 			            }
 			        }
-			        this._log("done"); 
+			        ////this._log("done"); 
 			    }
 			
 			
